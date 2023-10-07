@@ -3,6 +3,8 @@ const express = require("express");
 
 const app = express();
 
+app.use(express.json());
+
 // app.use(cors());
 
 app.use((req, res, next) => {
@@ -18,13 +20,20 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post("api/books", (req, res, next) => {
+  console.log(req.body);
+  res.status(201).json({ message: "Objet créé !" });
+  next();
+});
+
 app.get("/api/books", (req, res) => {
   const books = [
     {
       userId: "nabs",
       title: "Le Dernier Jour d'un condamné",
       author: "Victor Hugo",
-      imageUrl: "",
+      imageUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/HugoLastDayCondemnedMan.jpg/250px-HugoLastDayCondemnedMan.jpg",
       year: 1829,
       genre: "Roman",
       ratings: [
@@ -33,13 +42,14 @@ app.get("/api/books", (req, res) => {
           grade: "5",
         },
       ],
-      averageRating: "",
+      averageRating: "5",
     },
     {
       userId: "nabs",
       title: "Odes et Ballades",
       author: "Victor Hugo",
-      imageUrl: "",
+      imageUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/HugoOdesBallades.jpg/250px-HugoOdesBallades.jpg",
       year: 1828,
       genre: "Poésie",
       ratings: [
@@ -48,7 +58,7 @@ app.get("/api/books", (req, res) => {
           grade: "4",
         },
       ],
-      averageRating: "",
+      averageRating: "2",
     },
   ];
   res.status(200).json(books);
