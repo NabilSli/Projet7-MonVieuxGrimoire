@@ -1,7 +1,6 @@
 const express = require("express");
-// const cors = require("cors");
+const path = require("path");
 const mongoose = require("mongoose");
-const book = require("./models/Book");
 
 mongoose
   .connect(
@@ -16,7 +15,6 @@ const booksRoutes = require("./routes/books");
 const userRoutes = require("./routes/user");
 
 app.use(express.json());
-// app.use(cors());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

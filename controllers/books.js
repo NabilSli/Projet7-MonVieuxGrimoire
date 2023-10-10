@@ -5,14 +5,15 @@ exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   delete bookObject._id;
   delete bookObject.userId;
-  const Book = new Book({
+  const book = new Book({
     ...bookObject,
     userId: req.auth.userId,
     imageUrl: `${req.protocol}://${req.get("host")}/images/${
       req.file.filename
     }`,
   });
-  Book.save()
+  book
+    .save()
     .then(() => {
       res.status(200).json({ message: "objet enregistré" });
     })
@@ -56,12 +57,12 @@ exports.deleteBook = (req, res, next) => {
       if (book.userId != req.auth.userId) {
         res.status(401).json({ message: "not authorized" });
       } else {
-        const filename = book.imageUrl.split.("/image")[1];
+        const filename = book.imageUrl.split("/image")[1];
         fs.unlink(`images/${filename}`, () => {
           Book.deleteOne({ _id: req.params.id })
-            .then(res.status(200).json({message: "Objet suprimé"}))
-            .catch(error=> res.status(401).json({error}))
-        })
+            .then(res.status(200).json({ message: "Objet suprimé" }))
+            .catch((error) => res.status(401).json({ error }));
+        });
       }
     })
     .catch((error) => {
