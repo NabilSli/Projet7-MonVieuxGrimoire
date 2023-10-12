@@ -1,7 +1,7 @@
 const express = require("express");
-// const cors = require("cors");
+const path = require("path");
 const mongoose = require("mongoose");
-const book = require("./models/Book");
+const bodyParser = require("body-parser");
 
 mongoose
   .connect(
@@ -12,9 +12,12 @@ mongoose
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 const app = express();
+const booksRoutes = require("./routes/books");
+const userRoutes = require("./routes/user");
 
 app.use(express.json());
-// app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -29,72 +32,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("api/books", (req, res, next) => {
-  const book = new Book({ ...req.body });
-  book
-    .save()
-    .then(() => res.status(201).json({ message: "Objet enregistrée !" }))
-    .catch((error) => res.status(400).json({ error }));
-});
-
-app.put("api/books", (req, res, next) => {
-  Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-    .then(() => res.status(200).json({ message: "Objet modifié !" }))
-    .catch((error) => res.status(400).json({ error }));
-});
-
-app.delete("api/books", (req, res, next) => {
-  book
-    .deleteOne({ _id: req.params.id })
-    .then(() => res.status(200).json({ message: "Objet supprimé" }))
-    .catch((error) => res.status(400).json({ error }));
-});
-
-app.get("/api/books/:id", (req, res, next) => {
-  Book.findOne({ _id: req.params.id })
-    .then((book) => res.status(200).json(book))
-    .catch((error) => res.status(400).json({ error }));
-});
-
-app.get("/api/books", (req, res, next) => {
-  book
-    .find()
-    .then((books) => res.status(200).json(books))
-    .catch((error) => res.status(400).json({ error }));
-  // const books = [
-  // {
-  //   userId: "nabs",
-  //   title: "Le Dernier Jour d'un condamné",
-  //   author: "Victor Hugo",
-  //   imageUrl:
-  //     "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/HugoLastDayCondemnedMan.jpg/250px-HugoLastDayCondemnedMan.jpg",
-  //   year: 1829,
-  //   genre: "Roman",
-  //   ratings: [
-  //     {
-  //       userId: "identifiant mongoDB",
-  //       grade: "5",
-  //     },
-  //   ],
-  //   averageRating: "5",
-  // },
-  // {
-  //   userId: "nabs",
-  //   title: "Odes et Ballades",
-  //   author: "Victor Hugo",
-  //   imageUrl:
-  //     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/HugoOdesBallades.jpg/250px-HugoOdesBallades.jpg",
-  //   year: 1828,
-  //   genre: "Poésie",
-  //   ratings: [
-  //     {
-  //       userId: "identifiant mongoDB",
-  //       grade: "4",
-  //     },
-  //   ],
-  //   averageRating: "2",
-  // },
-  // ];
-});
+app.use("/api/books", booksRoutes);
+app.use("/api/auth", userRoutes);
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 module.exports = app;
