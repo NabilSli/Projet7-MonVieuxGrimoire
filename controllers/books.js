@@ -1,5 +1,7 @@
+const { log } = require("console");
 const Book = require("../models/Book");
 const fs = require("fs");
+const { ObjectId } = require("mongodb");
 
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
@@ -80,4 +82,51 @@ exports.getAllBooks = (req, res, next) => {
   Book.find()
     .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
+};
+
+exports.addRating = async (req, res, next) => {
+  try {
+    const { grade, bookId } = req.body;
+    req.auth = { userId: "65256bd2f97abfbe58d47de9" };
+    console.log(req.body);
+    if (!grade || (grade <= 0 && grade > 5) || !bookId) {
+      return res
+        .status(400)
+        .json({ error: "veuillez renseigner tout les parametres" });
+    }
+    Book.findOne({ _id: bookId })
+      .then(async (book) => {
+        let isAlreadyRated = false;
+
+        await book.ratings.map((rating) => {
+          console.log(Boolean(rating.userId.toString() === req.auth.userId));
+          if (
+            rating.userId.toString().toLowerCase() ===
+            req.auth.userId.toLowerCase()
+          ) {
+            isAlreadyRated = true;
+          }
+        });
+
+        if (isAlreadyRated) {
+          return res
+            .status(400)
+            .json({ error: "vous avez deja noter ce livre" });
+        }
+
+        const updatedBook = await book.updateOne({
+          ratings: [...book.ratings, { userId: req.auth.userId, grade: grade }],
+        });
+        console.log(updatedBook);
+        return res
+          .status(200)
+          .json({ message: "Votre note a ete prise en compte" });
+      })
+      .catch(() => {
+        return res.status(404).json({ error: "Le livre est introuvable" });
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error });
+  }
 };

@@ -8,8 +8,11 @@ const bookSchema = mongoose.Schema({
   genre: { type: String, required: true },
   ratings: [
     {
-      userId: { type: String, required: true },
-      grade: { type: Number, required: true },
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+      },
+      grade: { type: Number, min: 1, max: 5, required: true },
     },
   ],
 });
