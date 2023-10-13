@@ -1,5 +1,5 @@
 const { log } = require("console");
-const Book = require("../models/Book");
+const Book = require("../models/book");
 const fs = require("fs");
 const { ObjectId } = require("mongodb");
 
@@ -7,6 +7,7 @@ exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   delete bookObject._id;
   delete bookObject.userId;
+  console.log("auth", req.auth);
   const book = new Book({
     ...bookObject,
     userId: req.auth.userId,
@@ -84,11 +85,19 @@ exports.getAllBooks = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
+function calculateAverageRating(ratings) {
+  if (ratings.length === 0) return 0;
+
+  const sumOfRatings = ratings.reduce((acc, rating) => acc + rating.grade, 0);
+  return sumOfRatings / ratings.length;
+}
+
 exports.addRating = async (req, res, next) => {
   try {
-    const { grade, bookId } = req.body;
-    req.auth = { userId: "65256bd2f97abfbe58d47de9" };
-    console.log(req.body);
+    const grade = req.body.rating;
+    const bookId = req.params.id;
+
+    console.log(req.params);
     if (!grade || (grade <= 0 && grade > 5) || !bookId) {
       return res
         .status(400)
@@ -118,6 +127,13 @@ exports.addRating = async (req, res, next) => {
           ratings: [...book.ratings, { userId: req.auth.userId, grade: grade }],
         });
         console.log(updatedBook);
+        const newAverageRating = calculateAverageRating([
+          ...book.ratings,
+          { grade },
+        ]);
+        await Book.findByIdAndUpdate(bookId, {
+          averageRating: newAverageRating,
+        });
         return res
           .status(200)
           .json({ message: "Votre note a ete prise en compte" });
@@ -126,7 +142,23 @@ exports.addRating = async (req, res, next) => {
         return res.status(404).json({ error: "Le livre est introuvable" });
       });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ error });
+  }
+};
+
+exports.getBestRating = async (req, res, next) => {
+  try {
+    // Récupérer les trois livres avec les averageRating les plus élevés
+    const bestRatedBooks = await Book.find()
+      .sort({ averageRating: -1 })
+      .limit(3);
+    console.log(bestRatedBooks);
+    res.status(200).json({ bestRatedBooks });
+    console.log(bestRatedBooks);
+  } catch (error) {
+    res.status(500).json({
+      error:
+        "Une erreur est survenue lors de la récupération des livres les mieux notés.",
+    });
   }
 };
