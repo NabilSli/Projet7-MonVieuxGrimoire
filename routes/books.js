@@ -10,6 +10,6 @@ router.put("/:id", auth, multer, bookCtrl.modifyBook);
 router.delete("/:id", auth, bookCtrl.deleteBook);
 router.get("/:id", bookCtrl.getOneBook);
 router.get("/", bookCtrl.getAllBooks);
-router.post("/rating", bookCtrl.addRating);
+router.post("/rating", auth, bookCtrl.addRating);
 
 module.exports = router;

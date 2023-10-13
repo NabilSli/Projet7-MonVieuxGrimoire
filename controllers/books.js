@@ -88,7 +88,6 @@ exports.getAllBooks = (req, res, next) => {
 exports.addRating = async (req, res, next) => {
   try {
     const { grade, bookId } = req.body;
-    req.auth = { userId: "65256bd2f97abfbe58d47de9" };
     console.log(req.body);
     if (!grade || (grade <= 0 && grade > 5) || !bookId) {
       return res
