@@ -16,6 +16,7 @@ const bookSchema = mongoose.Schema({
       grade: { type: Number, min: 1, max: 5, required: true },
     },
   ],
+  averageRating: { type: Number, required: true },
 });
 
 module.exports = mongoose.model("book", bookSchema);

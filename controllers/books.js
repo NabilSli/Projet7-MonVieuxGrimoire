@@ -85,10 +85,19 @@ exports.getAllBooks = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
+function calculateAverageRating(ratings) {
+  if (ratings.length === 0) return 0;
+
+  const sumOfRatings = ratings.reduce((acc, rating) => acc + rating.grade, 0);
+  return sumOfRatings / ratings.length;
+}
+
 exports.addRating = async (req, res, next) => {
   try {
-    const { grade, bookId } = req.body;
-    console.log(req.body);
+    const grade = req.body.rating;
+    const bookId = req.params.id;
+
+    console.log(req.params);
     if (!grade || (grade <= 0 && grade > 5) || !bookId) {
       return res
         .status(400)
@@ -118,6 +127,13 @@ exports.addRating = async (req, res, next) => {
           ratings: [...book.ratings, { userId: req.auth.userId, grade: grade }],
         });
         console.log(updatedBook);
+        const newAverageRating = calculateAverageRating([
+          ...book.ratings,
+          { grade },
+        ]);
+        await Book.findByIdAndUpdate(bookId, {
+          averageRating: newAverageRating,
+        });
         return res
           .status(200)
           .json({ message: "Votre note a ete prise en compte" });
