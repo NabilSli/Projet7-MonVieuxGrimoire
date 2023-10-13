@@ -1,5 +1,5 @@
 const { log } = require("console");
-const Book = require("../models/Book");
+const Book = require("../models/book");
 const fs = require("fs");
 const { ObjectId } = require("mongodb");
 
@@ -126,7 +126,6 @@ exports.addRating = async (req, res, next) => {
         return res.status(404).json({ error: "Le livre est introuvable" });
       });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ error });
   }
 };
