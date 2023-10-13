@@ -145,3 +145,20 @@ exports.addRating = async (req, res, next) => {
     return res.status(500).json({ error });
   }
 };
+
+exports.getBestRating = async (req, res, next) => {
+  try {
+    // Récupérer les trois livres avec les averageRating les plus élevés
+    const bestRatedBooks = await Book.find()
+      .sort({ averageRating: -1 })
+      .limit(3);
+    console.log(bestRatedBooks);
+    res.status(200).json({ bestRatedBooks });
+    console.log(bestRatedBooks);
+  } catch (error) {
+    res.status(500).json({
+      error:
+        "Une erreur est survenue lors de la récupération des livres les mieux notés.",
+    });
+  }
+};
