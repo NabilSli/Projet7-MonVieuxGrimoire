@@ -108,9 +108,9 @@ exports.addRating = async (req, res, next) => {
         let isAlreadyRated = false;
 
         await book.ratings.map((rating) => {
-          console.log(Boolean(rating.userId.toString() === req.auth.userId));
+          console.log(rating);
           if (
-            rating.userId.toString().toLowerCase() ===
+            rating._id.toString().toLowerCase() ===
             req.auth.userId.toLowerCase()
           ) {
             isAlreadyRated = true;
@@ -138,7 +138,8 @@ exports.addRating = async (req, res, next) => {
           .status(200)
           .json({ message: "Votre note a ete prise en compte" });
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log("introuvable", error);
         return res.status(404).json({ error: "Le livre est introuvable" });
       });
   } catch (error) {
