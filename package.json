@@ -14,4 +14,6 @@
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.0"
   }
+
+  //TODO: ajouter les packages necessaires
 }

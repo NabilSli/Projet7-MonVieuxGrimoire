@@ -16,5 +16,5 @@ const storage = multer.diskStorage({
     callback(null, name + Date.now() + "." + extension);
   },
 });
-
+//TODO: tester en plus taille max de l'image (1mb), ajouter sharp pour ecrasement d'image
 module.exports = multer({ storage: storage }).single("image");

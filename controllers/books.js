@@ -104,6 +104,7 @@ exports.addRating = async (req, res, next) => {
         .json({ error: "veuillez renseigner tout les parametres" });
     }
     Book.findOne({ _id: bookId })
+      //TODO: enlever le .then pour utiliser que les async await
       .then(async (book) => {
         let isAlreadyRated = false;
 
@@ -136,7 +137,7 @@ exports.addRating = async (req, res, next) => {
         });
         return res
           .status(200)
-          .json({ message: "Votre note a ete prise en compte" });
+          .json({ message: "Votre note a ete prise en compte" }); // renvoyer l'objet livre modifier
       })
       .catch((error) => {
         console.log("introuvable", error);
@@ -149,12 +150,12 @@ exports.addRating = async (req, res, next) => {
 
 exports.getBestRating = async (req, res, next) => {
   try {
-    // Récupérer les trois livres avec les averageRating les plus élevés
+    // Récupérer les trois livres avec les averageRating les plus élevés Ajouter tofixed pour la valeur 
     const bestRatedBooks = await Book.find()
       .sort({ averageRating: -1 })
       .limit(3);
     console.log(bestRatedBooks);
-    res.status(200).json({ bestRatedBooks });
+    res.status(200).json(bestRatedBooks);
     console.log(bestRatedBooks);
   } catch (error) {
     res.status(500).json({
