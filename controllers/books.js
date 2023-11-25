@@ -120,7 +120,7 @@ exports.addRating = async (req, res, next) => {
         return res.status(400).json({ error: "vous avez deja noter ce livre" });
       }
 
-      const updatedBook = await book.updateOne({
+      await book.updateOne({
         ratings: [...book.ratings, { userId: req.auth.userId, grade: grade }],
       });
 
@@ -129,13 +129,11 @@ exports.addRating = async (req, res, next) => {
         { grade },
       ]);
 
-      await Book.findByIdAndUpdate(bookId, {
+      const updatedBook = await Book.findByIdAndUpdate(bookId, {
         averageRating: newAverageRating,
       });
 
-      return res
-        .status(200)
-        .json({ message: "Votre note a ete prise en compte" });
+      return res.status(200).json(updatedBook);
     } catch (error) {
       console.log("introuvable", error);
       return res.status(404).json({ error: "Le livre est introuvable" });
