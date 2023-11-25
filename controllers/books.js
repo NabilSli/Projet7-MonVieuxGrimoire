@@ -97,52 +97,49 @@ exports.addRating = async (req, res, next) => {
     const grade = req.body.rating;
     const bookId = req.params.id;
 
-    console.log(req.params);
     if (!grade || (grade <= 0 && grade > 5) || !bookId) {
       return res
         .status(400)
         .json({ error: "veuillez renseigner tout les parametres" });
     }
-    Book.findOne({ _id: bookId })
-      //TODO: enlever le .then pour utiliser que les async await
-      .then(async (book) => {
-        let isAlreadyRated = false;
 
-        await book.ratings.map((rating) => {
-          console.log(rating);
-          if (
-            rating._id.toString().toLowerCase() ===
-            req.auth.userId.toLowerCase()
-          ) {
-            isAlreadyRated = true;
-          }
-        });
+    try {
+      const book = await Book.findOne({ _id: bookId });
 
-        if (isAlreadyRated) {
-          return res
-            .status(400)
-            .json({ error: "vous avez deja noter ce livre" });
+      let isAlreadyRated = false;
+
+      book.ratings.forEach((rating) => {
+        if (
+          rating._id.toString().toLowerCase() === req.auth.userId.toLowerCase()
+        ) {
+          isAlreadyRated = true;
         }
-
-        const updatedBook = await book.updateOne({
-          ratings: [...book.ratings, { userId: req.auth.userId, grade: grade }],
-        });
-        console.log(updatedBook);
-        const newAverageRating = calculateAverageRating([
-          ...book.ratings,
-          { grade },
-        ]);
-        await Book.findByIdAndUpdate(bookId, {
-          averageRating: newAverageRating,
-        });
-        return res
-          .status(200)
-          .json({ message: "Votre note a ete prise en compte" }); // renvoyer l'objet livre modifier
-      })
-      .catch((error) => {
-        console.log("introuvable", error);
-        return res.status(404).json({ error: "Le livre est introuvable" });
       });
+
+      if (isAlreadyRated) {
+        return res.status(400).json({ error: "vous avez deja noter ce livre" });
+      }
+
+      const updatedBook = await book.updateOne({
+        ratings: [...book.ratings, { userId: req.auth.userId, grade: grade }],
+      });
+
+      const newAverageRating = calculateAverageRating([
+        ...book.ratings,
+        { grade },
+      ]);
+
+      await Book.findByIdAndUpdate(bookId, {
+        averageRating: newAverageRating,
+      });
+
+      return res
+        .status(200)
+        .json({ message: "Votre note a ete prise en compte" });
+    } catch (error) {
+      console.log("introuvable", error);
+      return res.status(404).json({ error: "Le livre est introuvable" });
+    }
   } catch (error) {
     return res.status(500).json({ error });
   }
@@ -150,7 +147,7 @@ exports.addRating = async (req, res, next) => {
 
 exports.getBestRating = async (req, res, next) => {
   try {
-    // Récupérer les trois livres avec les averageRating les plus élevés Ajouter tofixed pour la valeur 
+    // Récupérer les trois livres avec les averageRating les plus élevés Ajouter tofixed pour la valeur
     const bestRatedBooks = await Book.find()
       .sort({ averageRating: -1 })
       .limit(3);
