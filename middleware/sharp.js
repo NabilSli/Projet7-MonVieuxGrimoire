@@ -1,22 +1,31 @@
 const sharp = require("sharp");
 
-sharp(req.file.path)
-  .resize({ width: 800 })
-  .webp({ quality: 80 })
-  .toBuffer((err, buffer, info) => {
-    if (err) {
-      console.error("Erreur lors du traitement de l'image :", err);
-      return res
-        .status(500)
-        .json({ error: "Erreur lors du traitement de l'image" });
-    }
+const fs = require("fs");
 
-    const fileSize = Buffer.byteLength(buffer, "base64");
+const sharpImage = (req, res, next) => {
+  try {
+    const extension = req.file.filename.split(".").pop();
+    const filename = req.file.filename.split(`.${extension}`)[0];
 
-    if (fileSize < 1000000) {
-      //enregistrez le buffer dans le fichier image
-    } else {
-      res.status(400).json({ error });
-      console.log("L'image est toujours trop grande");
-    }
-  });
+    sharp(req.file.path)
+      .resize({ width: 800 })
+      .webp({ quality: 80 })
+      .toFile(`images/${filename}.webp`)
+      .then(() => {
+        fs.unlink(`images/${req.file.filename}`, () => {
+          req.file.path = `images/${filename}.webp`;
+          req.file.filename = `${filename}.webp`;
+          next();
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(400).json({ error });
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error });
+  }
+};
+
+module.exports = sharpImage;
