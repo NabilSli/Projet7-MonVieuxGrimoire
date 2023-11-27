@@ -1,4 +1,4 @@
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
 
 module.exports = {
   endpoint: process.env.API_URL,
