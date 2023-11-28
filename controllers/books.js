@@ -107,7 +107,9 @@ function calculateAverageRating(ratings) {
   if (ratings.length === 0) return 0;
 
   const sumOfRatings = ratings.reduce((acc, rating) => acc + rating.grade, 0);
-  return sumOfRatings / ratings.length;
+  const average = sumOfRatings / ratings.length;
+
+  return Math.round(average);
 }
 
 exports.addRating = async (req, res, next) => {
@@ -153,7 +155,6 @@ exports.addRating = async (req, res, next) => {
 
       return res.status(200).json(updatedBook);
     } catch (error) {
-      console.log("introuvable", error);
       return res.status(404).json({ error: "Le livre est introuvable" });
     }
   } catch (error) {
@@ -163,13 +164,11 @@ exports.addRating = async (req, res, next) => {
 
 exports.getBestRating = async (req, res, next) => {
   try {
-    // Récupérer les trois livres avec les averageRating les plus élevés Ajouter tofixed pour la valeur
     const bestRatedBooks = await Book.find()
       .sort({ averageRating: -1 })
       .limit(3);
-    console.log(bestRatedBooks);
+
     res.status(200).json(bestRatedBooks);
-    console.log(bestRatedBooks);
   } catch (error) {
     res.status(500).json({
       error:
