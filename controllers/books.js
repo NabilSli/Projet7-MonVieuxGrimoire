@@ -41,6 +41,18 @@ exports.modifyBook = (req, res, next) => {
       if (book.userId != req.auth.userId) {
         res.status(401).json({ message: "Non autorisée" });
       } else {
+        if (req.file && book.imageUrl) {
+          const filename = book.imageUrl.split("/images/")[1];
+          fs.unlink(`images/${filename}`, (err) => {
+            if (err) {
+              console.error(
+                "Erreur lors de la suppression de l'ancienne image :",
+                err
+              );
+            }
+          });
+        }
+
         Book.updateOne(
           { _id: req.params.id },
           { ...bookObject, _id: req.params.i }
@@ -60,12 +72,18 @@ exports.deleteBook = (req, res, next) => {
       if (book.userId != req.auth.userId) {
         res.status(401).json({ message: "not authorized" });
       } else {
-        const filename = book.imageUrl.split("/image")[1];
-        fs.unlink(`images/${filename}`, () => {
-          Book.deleteOne({ _id: req.params.id })
-            .then(res.status(200).json({ message: "Objet suprimé" }))
-            .catch((error) => res.status(401).json({ error }));
-        });
+        if (book.imageUrl) {
+          const filename = book.imageUrl.split("/images/")[1];
+          fs.unlink(`images/${filename}`, (err) => {
+            if (err) {
+              console.error("Erreur lors de la suppression de l'image :", err);
+            }
+          });
+        }
+
+        Book.deleteOne({ _id: req.params.id })
+          .then(() => res.status(200).json({ message: "Objet supprimé" }))
+          .catch((error) => res.status(401).json({ error }));
       }
     })
     .catch((error) => {
