@@ -1,44 +1,45 @@
 const multer = require("multer");
 
-const maxFileSize = 1024 * 1024;
-const extensionRegex = /\.(jpg|jpeg|png)$/;
+const maxSize = 1 * 1024 * 1024;
+
 const MIME_TYPES = {
   "image/jpg": "jpg",
   "image/jpeg": "jpg",
   "image/png": "png",
+  "image/webp": "webp",
+};
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb({ message: "Le fichier selectionné n'est pas une image" }, false);
+  }
 };
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    callback(null, "images");
+    callback(null, "images/");
   },
   filename: (req, file, callback) => {
-    // Remove extension from name of file
-    const name = file.originalname.split(" ").join("_").split(".")[0];
-
-    // Replace all non-alphanumeric characters by _
-    const formattedFileName = name.replace(/\W/g, "_");
-
-    // Get extension of file
+    const name = file.originalname.split(" ").join("_");
+    const namepop = name.split(".");
+    namepop.pop();
+    const namePoint = namepop.join(".");
     const extension = MIME_TYPES[file.mimetype];
-
-    callback(null, formattedFileName + Date.now() + "." + extension);
+    callback(null, namePoint + Date.now() + "." + extension);
   },
 });
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: maxFileSize },
-  fileFilter: (req, file, callback) => {
-    if (!file.originalname.match(extensionRegex)) {
-      return callback(
-        new Error(
-          "Seuls les fichiers JPG, JPEG ou PNG de moins de 1mo sont autorisés."
-        )
-      );
-    }
-    callback(null, true);
-  },
-}).single("image");
+  limits: { file: 1, fileSize: maxSize },
+  fileFilter: multerFilter,
+});
 
-module.exports = upload;
+module.exports = (req, res, next) => {
+  upload.single("image")(req, res, (error) => {
+    if (error) return res.status(400).send({ error });
+    next();
+  });
+};
