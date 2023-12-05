@@ -1,10 +1,10 @@
 const rateLimit = require("express-rate-limit");
 
-let watchTime = 5 * 60 * 1000; // 30 minutes
+let watchTime = 30 * 60 * 1000; // 30 minutes
 
 const loginLimiter = rateLimit({
   windowMs: watchTime,
-  max: 10,
+  max: 3,
   message: "Trop de tentatives de connexion. Réessayez plus tard.",
 });
 

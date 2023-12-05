@@ -4,7 +4,7 @@ const loginLimiter = require("../middleware/rateLimite");
 
 const router = express.Router();
 
-router.post("/signup", loginLimiter, userCtrl.signup);
-router.post("/login", userCtrl.login);
+router.post("/signup", userCtrl.signup);
+router.post("/login", loginLimiter, userCtrl.login);
 
 module.exports = router;
