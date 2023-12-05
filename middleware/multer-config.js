@@ -42,4 +42,3 @@ const upload = multer({
 }).single("image");
 
 module.exports = upload;
-//TODO: tester en plus taille max de l'image (1mb), ajouter sharp pour ecrasement d'image

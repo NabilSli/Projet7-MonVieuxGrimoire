@@ -19,12 +19,10 @@ const sharpImage = (req, res, next) => {
         });
       })
       .catch((error) => {
-        console.log(error);
         res.status(400).json({ error });
       });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ error });
+    res.status(404).json({ message: "image non trouver" });
   }
 };
 
