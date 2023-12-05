@@ -129,7 +129,8 @@ exports.addRating = async (req, res, next) => {
 
       book.ratings.forEach((rating) => {
         if (
-          rating._id.toString().toLowerCase() === req.auth.userId.toLowerCase()
+          rating.userId.toString().toLowerCase() ===
+          req.auth.userId.toLowerCase()
         ) {
           isAlreadyRated = true;
         }
